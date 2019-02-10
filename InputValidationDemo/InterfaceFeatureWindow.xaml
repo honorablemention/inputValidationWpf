@@ -1,0 +1,121 @@
+﻿<Window x:Class="InputValidationDemo.InterfaceFeatureWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:InputValidationDemo"
+        xmlns:rules="clr-namespace:InputValidationDemo.Utils.ValidationRules"
+        mc:Ignorable="d"
+        Title="Interface Feature" Height="232.119" Width="451.376" ResizeMode="NoResize"
+        d:DataContext="{d:DesignInstance {x:Type local:InterfaceFeatureViewModel}, IsDesignTimeCreatable=True}">
+
+        
+    <Window.Resources>
+        <FrameworkElement x:Key="DataContextBridge" DataContext="{Binding}"/>
+        <local:InterfaceFeatureViewModel x:Key="Validation" />
+        <ControlTemplate x:Key="ValidationTemplate">
+            <StackPanel>
+                <AdornedElementPlaceholder/>
+                <TextBlock Foreground="Red" FontSize="10" Text="{Binding CurrentItem.ErrorContent}"/>
+            </StackPanel>
+        </ControlTemplate>
+
+        <Style x:Key="TextBoxInError" TargetType="{x:Type TextBox}">
+            <Style.Triggers>
+                <Trigger Property="Validation.HasError" Value="true">
+                    <Setter Property="ToolTip"
+                  Value="{Binding RelativeSource={x:Static RelativeSource.Self},
+                                  Path=(Validation.Errors)/ErrorContent}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+
+
+    <Grid>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="283*"/>
+            <ColumnDefinition Width="95*"/>
+        </Grid.ColumnDefinitions>
+        <Button x:Name="submitButton" Content="Submit" HorizontalAlignment="Left" Margin="286,152,0,0" VerticalAlignment="Top" Width="75" Grid.ColumnSpan="2">
+            <Button.Style>
+                <Style TargetType="{x:Type Button}">
+                    <Setter Property="IsEnabled" Value="False"/>
+                    <Style.Triggers>
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding ElementName=attributeEntryTextBox, Path=(Validation.HasError)}" Value="false" />
+                                <Condition Binding="{Binding ElementName=input1EntryTextBox, Path=(Validation.HasError)}" Value="false"/>
+                                <Condition Binding="{Binding ElementName=input2EntryTextBox, Path=(Validation.HasError)}" Value="false" />
+                            </MultiDataTrigger.Conditions>
+                            <Setter Property="IsEnabled" Value="True"/>
+                        </MultiDataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Button.Style>
+        </Button>
+
+
+        <Label x:Name="attributeLabel" Content="Attribute" HorizontalAlignment="Left" Margin="177,6,0,0" VerticalAlignment="Top" HorizontalContentAlignment="Right" Width="58"/>
+        <Label x:Name="input1Label" Content="Input1" HorizontalAlignment="Left" Margin="178,52,0,0" VerticalAlignment="Top" HorizontalContentAlignment="Right" Width="58"/>
+        <Label x:Name="input2Label" Content="Input2" HorizontalAlignment="Left" Margin="177,102,0,0" VerticalAlignment="Top" Width="58" HorizontalContentAlignment="Right"/>
+
+        <ItemsControl Name="ValueCollection" ItemsSource="{Binding ValueValues}" Visibility="Hidden" />
+
+        <TextBox x:Name="attributeEntryTextBox" HorizontalAlignment="Left" Height="23" Margin="240,9,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" Grid.ColumnSpan="2"
+                 Validation.ErrorTemplate="{StaticResource ValidationTemplate}"
+                 Style="{StaticResource TextBoxInError}">
+            <TextBox.Resources>
+                <rules:SelectedValueContainer x:Key="SelectedValueProxy" Value ="{Binding Path=SelectedItem, ElementName=ValueSelectionComboBox, Mode=TwoWay}" />
+                <rules:SelectedValueContainer x:Key="SourceProxy" Value="{Binding Path=Items.Count, ElementName=ValueCollection}"/>
+            </TextBox.Resources>
+            <TextBox.Text>
+                <Binding Path ="AttributeUserValue" UpdateSourceTrigger="PropertyChanged">
+                    <Binding.ValidationRules>
+                        <rules:InterfaceFeatureValidationRules ValidatesOnTargetUpdated="True">
+                            <rules:SelectedValueDependency SelectedValue="{Binding Value, Source={StaticResource SelectedValueProxy}}" BindingToTrigger="{Binding Value, Source={StaticResource SourceProxy}}"  />
+                        </rules:InterfaceFeatureValidationRules>
+                    </Binding.ValidationRules>
+                </Binding>
+
+            </TextBox.Text>
+
+        </TextBox>
+
+
+        <TextBox x:Name="input1EntryTextBox" HorizontalAlignment="Left" Height="23" Margin="241,55,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" Grid.ColumnSpan="2"
+                 Validation.ErrorTemplate="{StaticResource ValidationTemplate}"
+                 Style="{StaticResource TextBoxInError}">
+            <TextBox.Text>
+                <Binding Path ="Input1UserValue"
+                     UpdateSourceTrigger="PropertyChanged">
+                    <Binding.ValidationRules>
+                        <rules:Input1ValidationRules ValidatesOnTargetUpdated="True" />
+                    </Binding.ValidationRules>
+                </Binding>
+            </TextBox.Text>
+        </TextBox>
+
+
+        <TextBox x:Name="input2EntryTextBox" HorizontalAlignment="Left" Height="23" Margin="240,105,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" Grid.ColumnSpan="2"
+                 Validation.ErrorTemplate="{StaticResource ValidationTemplate}"
+                 Style="{StaticResource TextBoxInError}">
+            <TextBox.Text>
+                <Binding Path="Input2UserValue"
+                     UpdateSourceTrigger="PropertyChanged">
+                    <Binding.ValidationRules>
+                        <rules:Input2ValidationRules ValidatesOnTargetUpdated="True"/>
+                    </Binding.ValidationRules>
+                </Binding>
+            </TextBox.Text>
+        </TextBox>
+
+
+        <ComboBox x:Name="ValueSelectionComboBox" HorizontalAlignment="Left" Margin="66,10,0,0" VerticalAlignment="Top" Width="98" IsReadOnly="True" ItemsSource="{Binding Path=ValueValues}" SelectedItem="{Binding SelectedValue}">
+
+        </ComboBox>
+        <Label x:Name="valueComboBoxLabel" Content="Value:" HorizontalAlignment="Left" Margin="15,7,0,0" VerticalAlignment="Top" Width="46" HorizontalContentAlignment="Right"/>
+    </Grid>
+
+</Window>
